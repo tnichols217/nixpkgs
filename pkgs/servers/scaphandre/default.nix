@@ -1,10 +1,8 @@
-{ stdenv
-, lib
+{ lib
 , rustPlatform
 , fetchFromGitHub
 , pkg-config
 , openssl
-, powercap
 , nix-update-script
 , runCommand
 , dieHook
@@ -24,7 +22,7 @@ rustPlatform.buildRustPackage rec {
     hash = "sha256-cXwgPYTgom4KrL/PH53Fk6ChtALuMYyJ/oTrUKHCrzE=";
   };
 
-  cargoSha256 = "sha256-Vdkq9ShbHWepvIgHPjhKY+LmhjS+Pl84QelgEpen7Qs=";
+  cargoHash = "sha256-Vdkq9ShbHWepvIgHPjhKY+LmhjS+Pl84QelgEpen7Qs=";
 
   nativeBuildInputs = [ pkg-config ];
   buildInputs = [ openssl ];
@@ -66,7 +64,8 @@ rustPlatform.buildRustPackage rec {
     description = "Electrical power consumption metrology agent";
     homepage = "https://github.com/hubblo-org/scaphandre";
     license = licenses.asl20;
-    platforms = with platforms; [ "x86_64-linux"];
+    platforms = [ "x86_64-linux" ];
     maintainers = with maintainers; [ gaelreyrol ];
+    mainProgram = "scaphandre";
   };
 }

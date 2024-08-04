@@ -8,8 +8,8 @@
 
 buildPythonPackage rec {
   pname = "homeassistant-stubs";
-  version = "2023.7.3";
-  format = "pyproject";
+  version = "2024.7.4";
+  pyproject = true;
 
   disabled = python.version != home-assistant.python.version;
 
@@ -17,17 +17,17 @@ buildPythonPackage rec {
     owner = "KapJI";
     repo = "homeassistant-stubs";
     rev = "refs/tags/${version}";
-    hash = "sha256-M7AGGGB7PpZBrNf9bUNX13SbQ8raK6nEUNkHbTIYuXQ=";
+    hash = "sha256-xrYZTvHobr/53CdxKibQLEJ6wk4sdc1Ni/1icA9Sgc8=";
   };
 
-  nativeBuildInputs = [
+  build-system = [
     poetry-core
     home-assistant
   ];
 
   postPatch = ''
     # Relax constraint to year and month
-    substituteInPlace pyproject.toml --replace \
+    substituteInPlace pyproject.toml --replace-fail \
       'homeassistant = "${version}"' \
       'homeassistant = "~${lib.versions.majorMinor home-assistant.version}"'
   '';

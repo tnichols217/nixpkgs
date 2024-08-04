@@ -1,40 +1,33 @@
 { lib
+, callPackage
 , fetchFromGitLab
-, fetchFromGitHub
 , buildGoModule
 , pkg-config
-
-# libgit2 + dependencies
-, libgit2
-, http-parser
-, openssl
-, pcre
-, zlib
 }:
 
 let
-  version = "16.1.2";
+  version = "17.2.0";
   package_version = "v${lib.versions.major version}";
   gitaly_package = "gitlab.com/gitlab-org/gitaly/${package_version}";
+
+  git = callPackage ./git.nix { };
 
   commonOpts = {
     inherit version;
 
+    # nixpkgs-update: no auto update
     src = fetchFromGitLab {
       owner = "gitlab-org";
       repo = "gitaly";
       rev = "v${version}";
-      sha256 = "sha256-/yCmFbmKTp8V8CjdhoAPpAdwNEcaP/wB0oAeTLdMESo=";
+      hash = "sha256-thQ8Gufcygt3QEbIcmkroSuAky9kJ7f7hupim87AJdE=";
     };
 
-    vendorSha256 = "sha256-6oOFQGPwiMRQrESXsQsGzvWz9bCb0VTYIyyG/C2b3nA=";
+    vendorHash = "sha256-FqnGVRldhevJgBBvJcvGXzRaYWqSHzZiXIQmCNzJv+4=";
 
     ldflags = [ "-X ${gitaly_package}/internal/version.version=${version}" "-X ${gitaly_package}/internal/version.moduleVersion=${version}" ];
 
-    tags = [ "static,system_libgit2" ];
-
-    nativeBuildInputs = [ pkg-config ];
-    buildInputs = [ libgit2 openssl zlib pcre http-parser ];
+    tags = [ "static" ];
 
     doCheck = false;
   };
@@ -42,7 +35,7 @@ let
   auxBins = buildGoModule ({
     pname = "gitaly-aux";
 
-    subPackages = [ "cmd/gitaly-hooks" "cmd/gitaly-ssh" "cmd/gitaly-git2go" "cmd/gitaly-lfs-smudge" ];
+    subPackages = [ "cmd/gitaly-hooks" "cmd/gitaly-ssh" "cmd/gitaly-lfs-smudge" "cmd/gitaly-gpg" ];
   } // commonOpts);
 in
 buildGoModule ({
@@ -57,9 +50,13 @@ buildGoModule ({
 
   outputs = [ "out" ];
 
+  passthru = {
+    inherit git;
+  };
+
   meta = with lib; {
     homepage = "https://gitlab.com/gitlab-org/gitaly";
-    description = "A Git RPC service for handling all the git calls made by GitLab";
+    description = "Git RPC service for handling all the git calls made by GitLab";
     platforms = platforms.linux ++ [ "x86_64-darwin" ];
     maintainers = teams.gitlab.members;
     license = licenses.mit;

@@ -7,13 +7,14 @@
 
 let
   python = python3.override {
+    self = python;
     packageOverrides = self: super: {
       tulir-telethon = self.telethon.overridePythonAttrs (oldAttrs: rec {
-        version = "1.29.0a2";
+        version = "1.37.0a1";
         pname = "tulir-telethon";
         src = fetchPypi {
           inherit pname version;
-          hash = "sha256-pTN8mJxbXvnhL11PCH/ZLeSqW0GV124Y3JnDcLek8JE=";
+          hash = "sha256-FckMHqGaBsqvFbrEnDWqJAQG8j/euY2NooesnxV6Kcc=";
         };
         doCheck = false;
       });
@@ -22,14 +23,14 @@ let
 in
 python.pkgs.buildPythonPackage rec {
   pname = "mautrix-telegram";
-  version = "0.14.1";
+  version = "0.15.2";
   disabled = python.pythonOlder "3.8";
 
   src = fetchFromGitHub {
     owner = "mautrix";
     repo = "telegram";
     rev = "refs/tags/v${version}";
-    hash = "sha256-n3gO8R5lVl/8Tgo2tPzM64O2BRhoitsuPIC87bfxczc=";
+    hash = "sha256-uR0vhp7ONyjwMKbgM1iObpFRoQzyQzJLbw4i9P58jTs=";
   };
 
   format = "setuptools";
@@ -60,6 +61,8 @@ python.pkgs.buildPythonPackage rec {
     prometheus-client
     # sqlite
     aiosqlite
+    # proxy support
+    pysocks
   ] ++ lib.optionals withE2BE [
     # e2be
     python-olm
@@ -72,9 +75,10 @@ python.pkgs.buildPythonPackage rec {
 
   meta = with lib; {
     homepage = "https://github.com/mautrix/telegram";
-    description = "A Matrix-Telegram hybrid puppeting/relaybot bridge";
+    description = "Matrix-Telegram hybrid puppeting/relaybot bridge";
     license = licenses.agpl3Plus;
     platforms = platforms.linux;
     maintainers = with maintainers; [ nyanloutre ma27 nickcao ];
+    mainProgram = "mautrix-telegram";
   };
 }

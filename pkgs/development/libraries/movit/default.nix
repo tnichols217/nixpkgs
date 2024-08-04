@@ -12,11 +12,11 @@
 
 stdenv.mkDerivation rec {
   pname = "movit";
-  version = "1.7.0";
+  version = "1.7.1";
 
   src = fetchurl {
     url = "https://movit.sesse.net/${pname}-${version}.tar.gz";
-    sha256 = "sha256-I1l7k+pTdi1E33Y+zCtwIwj3b8Fzggmek4UiAIHOZhA=";
+    sha256 = "sha256-szBztwXwzLasSULPURUVFUB7QLtOmi3QIowcLLH7wRo=";
   };
 
   outputs = [ "out" "dev" ];
@@ -51,7 +51,7 @@ stdenv.mkDerivation rec {
     description = "High-performance, high-quality video filters for the GPU";
     homepage = "https://movit.sesse.net";
     license = licenses.gpl2Plus;
-    maintainers = [ maintainers.goibhniu ];
+    maintainers = [ ];
     platforms = platforms.unix;
   };
 }

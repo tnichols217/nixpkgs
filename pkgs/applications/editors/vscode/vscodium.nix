@@ -15,11 +15,11 @@ let
   archive_fmt = if stdenv.isDarwin then "zip" else "tar.gz";
 
   sha256 = {
-    x86_64-linux = "0dynpi8l2102z8kbzgdm8qwbpzm7jxjqvz8a3x0vsikxbfwhsdmy";
-    x86_64-darwin = "1z3vzwgcjj57xrw8mklhsdr8n9214rb4vj6jfnqv5nxpdgx4dw55";
-    aarch64-linux = "0jiwp6i9q8c87pfkhvj45viqi2m5x5aq94skrvxa8wjbkyafvm1d";
-    aarch64-darwin = "1as6zfrv2jymxspmc3m453vs61b7y1lh5qh34xr0ps8c4h6dbjas";
-    armv7l-linux = "17yd3bb4z99q4r0d91grifrbr50wln1fkz0bjp4s4snqnj9q9gfk";
+    x86_64-linux = "0am2g0vpb2fgqqs9m5v9dx8w47l2xnjy7bf3rr0bjr4yv4qn7g0n";
+    x86_64-darwin = "0520kpdfa2k1qlgnmnzisbbq0n4h119nfgnaljymsviw1ix02v7k";
+    aarch64-linux = "0r6sqyfcj3qs2iqpfhdjcd8jfazkmyxx0f92qpxlc6a5gllm3hlj";
+    aarch64-darwin = "03b0akbkmqp1fm6i61dx09lln8m3598xigi4wr0rkdsy0yq2vpl8";
+    armv7l-linux = "1sdml7bhrrn2qskhzs4ymibq7cw4nhjimxi8fmaj94dk5yri4wd3";
   }.${system} or throwSystem;
 
   sourceRoot = lib.optionalString (!stdenv.isDarwin) ".";
@@ -29,7 +29,7 @@ in
 
     # Please backport all compatible updates to the stable release.
     # This is important for the extension ecosystem.
-    version = "1.80.2.23209";
+    version = "1.91.1.24193";
     pname = "vscodium";
 
     executableName = "codium";
@@ -61,7 +61,7 @@ in
       downloadPage = "https://github.com/VSCodium/vscodium/releases";
       license = licenses.mit;
       sourceProvenance = with sourceTypes; [ binaryNativeCode ];
-      maintainers = with maintainers; [ synthetica turion bobby285271 ];
+      maintainers = with maintainers; [ synthetica bobby285271 ludovicopiero ];
       mainProgram = "codium";
       platforms = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" "armv7l-linux" ];
     };

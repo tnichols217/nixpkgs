@@ -3,6 +3,7 @@
 , fetchurl
 , unzip
 , runCommand
+, cctools
 , darwin
 , sources ? import ./sources.nix {inherit fetchurl;}
 , version ? sources.versionUsed
@@ -41,7 +42,7 @@ stdenv.mkDerivation (finalAttrs: {
 
       testCompile = runCommand "dart-test-compile" {
         nativeBuildInputs = [ finalAttrs.finalPackage ]
-          ++ lib.optionals stdenv.isDarwin [ darwin.cctools darwin.sigtool ];
+          ++ lib.optionals stdenv.isDarwin [ cctools darwin.sigtool ];
       } ''
         HELLO_MESSAGE="Hello, world!"
         echo "void main() => print('$HELLO_MESSAGE');" > hello.dart
@@ -55,7 +56,7 @@ stdenv.mkDerivation (finalAttrs: {
   };
 
   meta = with lib; {
-    homepage = "https://www.dartlang.org/";
+    homepage = "https://dart.dev";
     maintainers = with maintainers; [ grburst ];
     description = "Scalable programming language, with robust libraries and runtimes, for building web, server, and mobile apps";
     longDescription = ''

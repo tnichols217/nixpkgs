@@ -20,6 +20,7 @@
 , wrapQtAppsHook
 , yaml-cpp
 , litehtml
+, libsecret
 , gumbo
 , llvmPackages
 , rustc-demangle
@@ -29,11 +30,11 @@
 
 stdenv.mkDerivation rec {
   pname = "qtcreator";
-  version = "11.0.0";
+  version = "14.0.0";
 
   src = fetchurl {
     url = "https://download.qt.io/official_releases/${pname}/${lib.versions.majorMinor version}/${version}/qt-creator-opensource-src-${version}.tar.xz";
-    hash = "sha256-2/RPVfsDg00nC+3v9pWsT8Aq862oRfW575graxWaFDA=";
+    hash = "sha256-8v3P+cuO1/1csfx3k1LHp6lCkieIygAN6F2229eo1FQ=";
   };
 
   nativeBuildInputs = [
@@ -59,6 +60,7 @@ stdenv.mkDerivation rec {
     qtquicktimeline
     yaml-cpp
     litehtml
+    libsecret
     gumbo
     llvmPackages.libclang
     llvmPackages.llvm
@@ -97,7 +99,7 @@ stdenv.mkDerivation rec {
       advanced code editor, a visual debugger and a GUI designer.
     '';
     homepage = "https://wiki.qt.io/Qt_Creator";
-    license = licenses.lgpl3Plus;
+    license = licenses.gpl3Only; # annotated with The Qt Company GPL Exception 1.0
     maintainers = [ maintainers.rewine ];
     platforms = platforms.linux;
   };

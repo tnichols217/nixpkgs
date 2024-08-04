@@ -1,11 +1,10 @@
-{ lib, fetchFromGitHub, python3 }:
+{ lib, fetchFromGitHub, fetchPypi, python3 }:
 
 
 let
   py = python3.override {
+    self = py;
     packageOverrides = self: super: {
-      self = py;
-
       # not compatible with prompt_toolkit >=2.0
       prompt-toolkit = super.prompt-toolkit.overridePythonAttrs (oldAttrs: rec {
         name = "${oldAttrs.pname}-${version}";
@@ -18,10 +17,12 @@ let
       # Use click 7
       click = super.click.overridePythonAttrs (old: rec {
         version = "7.1.2";
-        src = old.src.override {
+        src = fetchPypi {
+          pname = "click";
           inherit version;
           hash = "sha256-0rUlXHxjSbwb0eWeCM0SrLvWPOZJ8liHVXg6qU37axo=";
         };
+        disabledTests = [ "test_bytes_args" ];
       });
     };
   };

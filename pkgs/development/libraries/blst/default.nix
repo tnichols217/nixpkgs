@@ -1,21 +1,21 @@
-{ stdenv, lib, fetchFromGitHub, autoreconfHook }:
+{ stdenv, lib, fetchFromGitHub }:
 
 stdenv.mkDerivation ( finalAttrs: {
   pname = "blst";
-  version = "0.3.10";
+  version = "0.3.13";
 
   src = fetchFromGitHub {
     owner = "supranational";
     repo = "blst";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-xero1aTe2v4IhWIJaEDUsVDOfE77dOV5zKeHWntHogY=";
+    hash = "sha256-+Ae2cCVVEXnV/ftVOApxDcXM3COf/4DXXd1AOuGS5uc=";
   };
 
   buildPhase = ''
     runHook preBuild
 
-    ./build.sh ${lib.optionalString stdenv.targetPlatform.isWindows "flavour=mingw64"}
-    ./build.sh -shared ${lib.optionalString stdenv.targetPlatform.isWindows "flavour=mingw64"}
+    ./build.sh ${lib.optionalString stdenv.hostPlatform.isWindows "flavour=mingw64"}
+    ./build.sh -shared ${lib.optionalString stdenv.hostPlatform.isWindows "flavour=mingw64"}
 
     runHook postBuild
   '';

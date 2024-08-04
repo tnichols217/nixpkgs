@@ -1,140 +1,84 @@
 { lib
 , stdenv
-, fetchurl
-, autoPatchelfHook
-, dpkg
+, fetchFromGitHub
+, pnpm
+, nodejs
+, electron_30
 , makeWrapper
-, wrapGAppsHook
-, alsa-lib
-, at-spi2-atk
-, at-spi2-core
-, atk
-, cairo
-, cups
-, dbus
-, expat
-, ffmpeg
-, fontconfig
-, freetype
-, gdk-pixbuf
-, glib
-, gtk3
-, libappindicator-gtk3
-, libdbusmenu
-, libdrm
-, libnotify
-, libpulseaudio
-, libsecret
-, libuuid
-, libxkbcommon
-, mesa
-, nss
-, pango
-, systemd
-, xdg-utils
-, xorg
-, wayland
-, pipewire
+, copyDesktopItems
+, makeDesktopItem
 }:
-
 stdenv.mkDerivation rec {
   pname = "armcord";
-  version = "3.2.1";
+  version = "3.2.7";
 
-  src =
-    let
-      base = "https://github.com/ArmCord/ArmCord/releases/download";
-    in
-      {
-        x86_64-linux = fetchurl {
-          url = "${base}/v${version}/ArmCord_${version}_amd64.deb";
-          sha256 = "1cfbypn9kh566s09c1bvxswpc0r11pmsvxlh4dixd5s622ia3h7r";
-        };
-        aarch64-linux = fetchurl {
-          url = "${base}/v${version}/ArmCord_${version}_arm64.deb";
-          sha256 = "0mb6az0mzjz2zal7igigjcigg3phn2ijfw04igpl7q2rg6ha3z00";
-        };
-      }.${stdenv.hostPlatform.system} or (throw "Unsupported system: ${stdenv.hostPlatform.system}");
+  src = fetchFromGitHub {
+    owner = "ArmCord";
+    repo = "ArmCord";
+    rev = "v${version}";
+    hash = "sha256-+o/w3bYW3IR3APo7HppSMOTl+cU+01J+p1L0YrYgsUU=";
+  };
 
-  nativeBuildInputs = [ autoPatchelfHook dpkg makeWrapper wrapGAppsHook ];
+  nativeBuildInputs = [ pnpm.configHook nodejs makeWrapper copyDesktopItems ];
 
-  dontWrapGApps = true;
+  pnpmDeps = pnpm.fetchDeps {
+    inherit pname version src;
+    hash = "sha256-UJ3E/2+MspgVbRT7s6K4lGDvTQbWD3bwyICbJjctwDI=";
+  };
 
-  buildInputs = [
-    alsa-lib
-    at-spi2-atk
-    at-spi2-core
-    atk
-    cairo
-    cups
-    dbus
-    expat
-    ffmpeg
-    fontconfig
-    freetype
-    gdk-pixbuf
-    glib
-    gtk3
-    pango
-    systemd
-    mesa # for libgbm
-    nss
-    libuuid
-    libdrm
-    libnotify
-    libsecret
-    libpulseaudio
-    libxkbcommon
-    libappindicator-gtk3
-    xorg.libX11
-    xorg.libxcb
-    xorg.libXcomposite
-    xorg.libXcursor
-    xorg.libXdamage
-    xorg.libXext
-    xorg.libXfixes
-    xorg.libXi
-    xorg.libXrandr
-    xorg.libXrender
-    xorg.libXScrnSaver
-    xorg.libxshmfence
-    xorg.libXtst
-    wayland
-    pipewire
-  ];
+  ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
 
-  sourceRoot = ".";
-  unpackCmd = "dpkg-deb -x $src .";
+  buildPhase = ''
+    runHook preBuild
+
+    pnpm build
+
+    npm exec electron-builder -- \
+      --dir \
+      -c.electronDist="${electron_30}/libexec/electron" \
+      -c.electronVersion="${electron_30.version}"
+
+    runHook postBuild
+  '';
 
   installPhase = ''
     runHook preInstall
 
-    mkdir -p "$out/bin"
-    cp -R "opt" "$out"
-    cp -R "usr/share" "$out/share"
-    chmod -R g-w "$out"
+    mkdir -p "$out/share/lib/armcord"
+    cp -r ./dist/*-unpacked/{locales,resources{,.pak}} "$out/share/lib/armcord"
 
-    # Wrap the startup command
-    makeWrapper $out/opt/ArmCord/armcord $out/bin/armcord \
+    install -Dm644 "build/icon.png" "$out/share/icons/hicolor/256x256/apps/armcord.png"
+
+    makeShellWrapper "${lib.getExe electron_30}" "$out/bin/armcord" \
+      --add-flags "$out/share/lib/armcord/resources/app.asar" \
       "''${gappsWrapperArgs[@]}" \
-      --prefix XDG_DATA_DIRS : "${gtk3}/share/gsettings-schemas/${gtk3.name}/" \
-      --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform=wayland --enable-features=UseOzonePlatform --enable-features=WebRTCPipeWireCapturer }}" \
-      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath buildInputs}" \
-      --suffix PATH : ${lib.makeBinPath [ xdg-utils ]}
-
-    # Fix desktop link
-    substituteInPlace $out/share/applications/armcord.desktop \
-      --replace /opt/ArmCord/ $out/bin/
+      --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations}}" \
+      --set-default ELECTRON_IS_DEV 0 \
+      --inherit-argv0
 
     runHook postInstall
   '';
 
+  desktopItems = [
+    (makeDesktopItem {
+      name = "armcord";
+      desktopName = "ArmCord";
+      exec = "${placeholder "out"}/bin/armcord %U";
+      icon = "armcord";
+      comment = meta.description;
+      categories = [ "Network" ];
+      startupWMClass = "ArmCord";
+      terminal = false;
+    })
+  ];
+
   meta = with lib; {
     description = "Lightweight, alternative desktop client for Discord";
-    homepage = "https://github.com/ArmCord/ArmCord";
-    sourceProvenance = with sourceTypes; [ binaryNativeCode ];
+    homepage = "https://armcord.app";
+    downloadPage = "https://github.com/ArmCord/ArmCord";
     license = licenses.osl3;
-    maintainers = with maintainers; [ wrmilling ];
+    maintainers = with maintainers; [ wrmilling water-sucks ];
     platforms = [ "x86_64-linux" "aarch64-linux" ];
+    mainProgram = "armcord";
   };
 }

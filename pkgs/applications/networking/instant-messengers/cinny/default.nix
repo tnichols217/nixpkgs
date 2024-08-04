@@ -1,31 +1,67 @@
-{ lib, stdenv, fetchurl, writeText, jq, conf ? {} }:
+{ lib
+, buildNpmPackage
+, fetchFromGitHub
+, writeText
+, jq
+, python3
+, pkg-config
+, pixman
+, cairo
+, pango
+, stdenv
+, darwin
+, conf ? { }
+}:
 
 let
   configOverrides = writeText "cinny-config-overrides.json" (builtins.toJSON conf);
-in stdenv.mkDerivation rec {
+in
+buildNpmPackage rec {
   pname = "cinny";
-  version = "2.2.6";
+  version = "4.0.3";
 
-  src = fetchurl {
-    url = "https://github.com/ajbura/cinny/releases/download/v${version}/cinny-v${version}.tar.gz";
-    hash = "sha256-AvYM8++PqKmm7CJN5hmg9GSC72IoHX+rRxuT3GflvjU=";
+  src = fetchFromGitHub {
+    owner = "cinnyapp";
+    repo = "cinny";
+    rev = "v${version}";
+    hash = "sha256-5Tf1CgB/YAyGVpopHERQ8xNGwklB+f2l+yfgCKsR3I8=";
   };
+
+  npmDepsHash = "sha256-wtHFqnz5BtMUikdFZyTiLrw+e69WErowYBhu8cnEjkI=";
+
+  # Fix error: no member named 'aligned_alloc' in the global namespace
+  env.NIX_CFLAGS_COMPILE = lib.optionalString (
+    stdenv.isDarwin && lib.versionOlder stdenv.hostPlatform.darwinSdkVersion "11.0"
+  ) "-D_LIBCPP_HAS_NO_LIBRARY_ALIGNED_ALLOCATION=1";
+
+  nativeBuildInputs = [
+    jq
+    python3
+    pkg-config
+  ];
+
+  buildInputs = [
+    pixman
+    cairo
+    pango
+  ] ++ lib.optionals stdenv.isDarwin [
+    darwin.apple_sdk.frameworks.CoreText
+  ];
 
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out/
-    cp -R . $out/
-    ${jq}/bin/jq -s '.[0] * .[1]' "config.json" "${configOverrides}" > "$out/config.json"
+    cp -r dist $out
+    jq -s '.[0] * .[1]' "config.json" "${configOverrides}" > "$out/config.json"
 
     runHook postInstall
   '';
 
-  meta = with lib; {
+  meta = {
     description = "Yet another Matrix client for the web";
     homepage = "https://cinny.in/";
-    maintainers = with maintainers; [ abbe ];
-    license = licenses.mit;
-    platforms = platforms.all;
+    maintainers = with lib.maintainers; [ abbe ];
+    license = lib.licenses.agpl3Only;
+    platforms = lib.platforms.all;
   };
 }

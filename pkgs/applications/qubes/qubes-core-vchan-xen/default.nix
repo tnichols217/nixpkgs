@@ -11,7 +11,7 @@ stdenv.mkDerivation rec {
     owner = "QubesOS";
     repo = pname;
     rev = "v${version}";
-    sha256 = "sha256:02l1vs5c2jfw22gxvl2fb66m0d99n8ya1i7rphsb5cxsljvxary0";
+    hash = "sha256:02l1vs5c2jfw22gxvl2fb66m0d99n8ya1i7rphsb5cxsljvxary0";
   };
 
   buildInputs = [ xen ];
@@ -28,8 +28,9 @@ stdenv.mkDerivation rec {
     description = "Libraries required for the higher-level Qubes daemons and tools";
     homepage = "https://qubes-os.org";
     license = licenses.gpl2Plus;
-    maintainers = with maintainers; [ _0x4A6F ];
+    maintainers = [ ];
     platforms = platforms.linux;
+    broken = true;
   };
 
 }

@@ -1,63 +1,65 @@
-{ lib
-, stdenv
-, fetchFromGitHub
-, cmake
-, ninja
-, chromium
-, grpc
-, haskellPackages
-, mercurial
-, python3Packages
+{
+  abseil-cpp,
+  chromium,
+  cmake,
+  fetchFromGitHub,
+  gbenchmark,
+  grpc,
+  gtest,
+  haskellPackages,
+  icu,
+  lib,
+  mercurial,
+  ninja,
+  python3Packages,
+  stdenv,
 }:
 
-stdenv.mkDerivation rec {
+stdenv.mkDerivation (finalAttrs: {
   pname = "re2";
-  version = "2023-03-01";
+  version = "2024-07-02";
 
   src = fetchFromGitHub {
     owner = "google";
     repo = "re2";
-    rev = version;
-    hash = "sha256-T+P7qT8x5dXkLZAL8VjvqPD345sa6ALX1f5rflE0dwc=";
+    rev = finalAttrs.version;
+    hash = "sha256-IeANwJlJl45yf8iu/AZNDoiyIvTCZIeK1b74sdCfAIc=";
   };
 
-  outputs = [ "out" "dev" ];
+  outputs = [
+    "out"
+    "dev"
+  ];
 
-  nativeBuildInputs = [ cmake ninja ];
+  nativeBuildInputs = [
+    cmake
+    ninja
+  ];
 
-  postPatch = ''
-    substituteInPlace re2Config.cmake.in \
-      --replace "\''${PACKAGE_PREFIX_DIR}/" ""
-  '';
+  buildInputs = [
+    gbenchmark
+    gtest
+  ];
 
-  # Needed for case-insensitive filesystems (i.e. MacOS) because a file named
-  # BUILD already exists.
-  cmakeBuildDir = "build_dir";
+  propagatedBuildInputs = [ abseil-cpp ] ++ lib.optionals (!stdenv.hostPlatform.isStatic) [ icu ];
 
-  cmakeFlags = lib.optional (!stdenv.hostPlatform.isStatic) "-DBUILD_SHARED_LIBS:BOOL=ON";
-
-  # This installs a pkg-config definition.
-  postInstall = ''
-    pushd "$src"
-    make common-install prefix="$dev" SED_INPLACE="sed -i"
-    popd
-  '';
+  cmakeFlags =
+    [ (lib.cmakeBool "RE2_BUILD_TESTING" true) ]
+    ++ lib.optionals (!stdenv.hostPlatform.isStatic) [
+      (lib.cmakeBool "RE2_USE_ICU" true)
+      (lib.cmakeBool "BUILD_SHARED_LIBS" true)
+    ];
 
   doCheck = true;
 
   passthru.tests = {
-    inherit
-      chromium
-      grpc
-      mercurial;
-    inherit (python3Packages)
-      fb-re2
-      google-re2;
+    inherit chromium grpc mercurial;
+    inherit (python3Packages) fb-re2 google-re2;
     haskell-re2 = haskellPackages.re2;
   };
 
   meta = with lib; {
-    description = "A regular expression library";
+    description = "Regular expression library";
     longDescription = ''
       RE2 is a fast, safe, thread-friendly alternative to backtracking regular
       expression engines like those used in PCRE, Perl, and Python. It is a C++
@@ -65,7 +67,10 @@ stdenv.mkDerivation rec {
     '';
     license = licenses.bsd3;
     homepage = "https://github.com/google/re2";
-    maintainers = with maintainers; [ azahi ];
+    maintainers = with maintainers; [
+      azahi
+      networkexception
+    ];
     platforms = platforms.all;
   };
-}
+})

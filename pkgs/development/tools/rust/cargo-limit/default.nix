@@ -17,7 +17,7 @@ rustPlatform.buildRustPackage rec {
     sha256 = "sha256-joWDB9fhCsYVZFZdr+Gfm4JaRlm5kj+CHp34Sx5iQYk=";
   };
 
-  cargoSha256 = "sha256-dwqbG0UFeUQHa0K98ebHfjbcQuQOhK2s6ZxAT6r0cik=";
+  cargoHash = "sha256-dwqbG0UFeUQHa0K98ebHfjbcQuQOhK2s6ZxAT6r0cik=";
 
   buildInputs = lib.optionals stdenv.isDarwin [ libiconv ];
 
@@ -29,6 +29,6 @@ rustPlatform.buildRustPackage rec {
     description = "Cargo subcommand \"limit\": reduces the noise of compiler messages";
     homepage = "https://github.com/alopatindev/cargo-limit";
     license = with licenses; [ asl20 /* or */ mit ];
-    maintainers = with maintainers; [ otavio ];
+    maintainers = with maintainers; [ otavio matthiasbeyer ];
   };
 }

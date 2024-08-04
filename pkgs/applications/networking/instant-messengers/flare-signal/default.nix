@@ -7,8 +7,10 @@
 , pkg-config
 , gst_all_1
 , protobuf
+, libspelling
 , libsecret
 , libadwaita
+, gtksourceview5
 , rustPlatform
 , rustc
 , appstream-glib
@@ -19,23 +21,23 @@
 
 stdenv.mkDerivation rec {
   pname = "flare";
-  version = "0.9.0";
+  version = "0.15.0";
 
   src = fetchFromGitLab {
     domain = "gitlab.com";
-    owner = "Schmiddiii";
-    repo = pname;
+    owner = "schmiddi-on-mobile";
+    repo = "flare";
     rev = version;
-    hash = "sha256-6p9uuK71fJvJs0U14jJEVb2mfpZWrCZZFE3eoZe9eVo=";
+    hash = "sha256-sIT4oEmIV8TJ5MMxg3vxkvK+7PaIy/01kN9I2FTsfo0=";
   };
 
   cargoDeps = rustPlatform.importCargoLock {
     lockFile = ./Cargo.lock;
     outputHashes = {
-      "curve25519-dalek-3.2.1" = "sha256-0hFRhn920tLBpo6ZNCl6DYtTMHMXY/EiDvuhOPVjvC0=";
-      "libsignal-protocol-0.1.0" = "sha256-IBhmd3WzkICiADO24WLjDJ8pFILGwWNUHLXKpt+Y0IY=";
-      "libsignal-service-0.1.0" = "sha256-WSRqBNq9jbe6PSeExfmehNZwjlB70GLlHkrDlw59O5c=";
-      "presage-0.6.0-dev" = "sha256-oNDfFLir3XL2UOGrWR/IFO7XTeJKX+vjdrd3qbIomtw=";
+      "curve25519-dalek-4.1.3" = "sha256-bPh7eEgcZnq9C3wmSnnYv0C4aAP+7pnwk9Io29GrI4A=";
+      "libsignal-core-0.1.0" = "sha256-4aHINlpVAqVTtm7npwXQRutZUmIxYgkhXhApg7jSM4M=";
+      "libsignal-service-0.1.0" = "sha256-UMQqp6hfyVtUwkAqsw/xsn7UrGul/F4WVC/Oy5s+hqA=";
+      "presage-0.6.2" = "sha256-4E23mzXwb5gcj0XpXB17a5BD96+ZAl7dh5I6vMvE9Kg=";
     };
   };
 
@@ -53,8 +55,10 @@ stdenv.mkDerivation rec {
   ];
 
   buildInputs = [
+    gtksourceview5
     libadwaita
     libsecret
+    libspelling
     protobuf
 
     # To reproduce audio messages
@@ -65,9 +69,10 @@ stdenv.mkDerivation rec {
   ];
 
   meta = {
-    changelog = "https://gitlab.com/Schmiddiii/flare/-/blob/${src.rev}/CHANGELOG.md";
-    description = "An unofficial Signal GTK client";
-    homepage = "https://gitlab.com/Schmiddiii/flare";
+    changelog = "https://gitlab.com/schmiddi-on-mobile/flare/-/blob/${src.rev}/CHANGELOG.md";
+    description = "Unofficial Signal GTK client";
+    mainProgram = "flare";
+    homepage = "https://gitlab.com/schmiddi-on-mobile/flare";
     license = lib.licenses.agpl3Plus;
     maintainers = with lib.maintainers; [ dotlambda ];
     platforms = lib.platforms.linux;

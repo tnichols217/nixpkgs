@@ -21,17 +21,18 @@
 , withEspeak ? true, espeak, sonic, pcaudiolib
 , mbrola
 , withPico ? true, svox
+, libsOnly ? false
 }:
 
 let
   inherit (python3Packages) python pyxdg wrapPython;
 in stdenv.mkDerivation rec {
   pname = "speech-dispatcher";
-  version = "0.11.4";
+  version = "0.11.5";
 
   src = fetchurl {
     url = "https://github.com/brailcom/speechd/releases/download/${version}/${pname}-${version}.tar.gz";
-    sha256 = "sha256-jAkiG7ctnbXInP17kZdxgyuGw6N3LWRWAWlklO31Zrk=";
+    sha256 = "sha256-HOR1n/q7rxrrQzpewHOb4Gdum9+66URKezvhsq8+wSs=";
   };
 
   patches = [
@@ -101,14 +102,16 @@ in stdenv.mkDerivation rec {
     substituteInPlace src/modules/pico.c --replace "/usr/share/pico/lang" "${svox}/share/pico/lang"
   '';
 
-  postInstall = ''
+  postInstall = if libsOnly then ''
+    rm -rf $out/{bin,etc,lib/speech-dispatcher,lib/systemd,libexec,share}
+  '' else ''
     wrapPythonPrograms
   '';
 
   enableParallelBuilding = true;
 
   meta = with lib; {
-    description = "Common interface to speech synthesis";
+    description = "Common interface to speech synthesis" + lib.optionalString libsOnly " - client libraries only";
     homepage = "https://devel.freebsoft.org/speechd";
     license = licenses.gpl2Plus;
     maintainers = with maintainers; [
@@ -116,5 +119,6 @@ in stdenv.mkDerivation rec {
       jtojnar
     ];
     platforms = platforms.linux;
+    mainProgram = "speech-dispatcher";
   };
 }

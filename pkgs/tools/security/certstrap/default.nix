@@ -14,7 +14,7 @@ buildGoModule rec {
     sha256 = "sha256-mbZtomR8nnawXr3nGVSEuVObe79M1CqTlYN/aEpKmcU=";
   };
 
-  vendorSha256 = "sha256-r7iYhTmFKTjfv11fEerC72M7JBp64rWfbkoTKzObNqM=";
+  vendorHash = "sha256-r7iYhTmFKTjfv11fEerC72M7JBp64rWfbkoTKzObNqM=";
 
   subPackages = [ "." ];
 
@@ -22,6 +22,7 @@ buildGoModule rec {
 
   meta = with lib; {
     description = "Tools to bootstrap CAs, certificate requests, and signed certificates";
+    mainProgram = "certstrap";
     longDescription = ''
       A simple certificate manager written in Go, to bootstrap your own
       certificate authority and public key infrastructure. Adapted from etcd-ca.
@@ -29,6 +30,6 @@ buildGoModule rec {
     homepage = "https://github.com/square/certstrap";
     changelog = "https://github.com/square/certstrap/releases/tag/${src.rev}";
     license = licenses.asl20;
-    maintainers = with maintainers; [ ];
+    maintainers = [ ];
   };
 }

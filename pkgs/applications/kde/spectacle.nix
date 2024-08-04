@@ -5,22 +5,13 @@
 , knotifications, kscreen, kwidgetsaddons, kwindowsystem, kxmlgui, libkipi
 , qtx11extras, knewstuff, kwayland, qttools, kcolorpicker, kimageannotator
 , qcoro, qtquickcontrols2, wayland, plasma-wayland-protocols, kpurpose, kpipewire
-, wrapGAppsHook, fetchpatch
+, wrapGAppsHook3
 }:
 
 mkDerivation {
   pname = "spectacle";
 
-  patches = [
-    # backport fix for region capture with multi-display high-dpi setups
-    # FIXME: remove in 23.08
-    (fetchpatch {
-      url = "https://invent.kde.org/graphics/spectacle/-/commit/d0886c85445fad227b256152a549cb33bd97b776.patch";
-      hash = "sha256-t0+X1pzjlS2OWduMwQBoYbjh+o/SF4hOkAqzz/MJw3E=";
-    })
-  ];
-
-  nativeBuildInputs = [ extra-cmake-modules kdoctools wrapGAppsHook ];
+  nativeBuildInputs = [ extra-cmake-modules kdoctools wrapGAppsHook3 ];
   buildInputs = [
     kconfig kcoreaddons kdbusaddons kdeclarative ki18n kio knotifications
     kscreen kwidgetsaddons kwindowsystem kxmlgui libkipi qtx11extras xcb-util-cursor
@@ -42,6 +33,7 @@ mkDerivation {
   meta = with lib; {
     homepage = "https://apps.kde.org/spectacle/";
     description = "Screenshot capture utility";
+    mainProgram = "spectacle";
     maintainers = with maintainers; [ ttuegel ];
   };
 }

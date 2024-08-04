@@ -2,26 +2,25 @@
 , fetchFromGitHub
 , gitUpdater
 , glibcLocales
-, gnome
+, adwaita-icon-theme
 , gobject-introspection
 , gtk3
 , intltool
-, python3
-, python3Packages
-, wrapGAppsHook
+, python311Packages
+, wrapGAppsHook3
 , xdg-utils
 }:
 
-python3Packages.buildPythonApplication rec {
+python311Packages.buildPythonApplication rec {
   pname = "gpodder";
-  version = "3.11.1";
+  version = "3.11.4";
   format = "other";
 
   src = fetchFromGitHub {
     owner = pname;
     repo = pname;
     rev = version;
-    sha256 = "Ns03MFhd4ZLtyeQTLTgLWY2Ot6gmrksFMOZm8jFaLIg=";
+    sha256 = "kEhyV1o8VSQW9qMx6m5avj6LnJuVTONDd6msRuc8t/4=";
   };
 
   patches = [
@@ -34,18 +33,17 @@ python3Packages.buildPythonApplication rec {
 
   nativeBuildInputs = [
     intltool
-    wrapGAppsHook
+    wrapGAppsHook3
     glibcLocales
     gobject-introspection
   ];
 
   buildInputs = [
-    python3
     gtk3
-    gnome.adwaita-icon-theme
+    adwaita-icon-theme
   ];
 
-  nativeCheckInputs = with python3Packages; [
+  nativeCheckInputs = with python311Packages; [
     minimock
     pytest
     pytest-httpserver
@@ -54,15 +52,16 @@ python3Packages.buildPythonApplication rec {
 
   doCheck = true;
 
-  propagatedBuildInputs = with python3Packages; [
+  propagatedBuildInputs = with python311Packages; [
     feedparser
     dbus-python
     mygpoclient
     requests
     pygobject3
-    eyeD3
+    eyed3
     podcastparser
     html5lib
+    mutagen
   ];
 
   makeFlags = [
@@ -86,7 +85,7 @@ python3Packages.buildPythonApplication rec {
   passthru.updateScript = gitUpdater {};
 
   meta = with lib; {
-    description = "A podcatcher written in python";
+    description = "Podcatcher written in python";
     longDescription = ''
       gPodder downloads and manages free audio and video content (podcasts)
       for you. Listen directly on your computer or on your mobile devices.
@@ -94,6 +93,6 @@ python3Packages.buildPythonApplication rec {
     homepage = "http://gpodder.org/";
     license = licenses.gpl3;
     platforms = platforms.linux ++ platforms.darwin;
-    maintainers = with maintainers; [ skeidel mic92 ];
+    maintainers = with maintainers; [ mic92 ];
   };
 }

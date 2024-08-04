@@ -11,7 +11,7 @@ buildGoModule rec {
     sha256 = "sha256-CoreqnMRuPuv+Ci1uyF3HJCJFwK2jwB79okynv6AHTA=";
   };
 
-  vendorSha256 = null;
+  vendorHash = null;
 
   nativeCheckInputs = with llvmPackages; [
     clang
@@ -22,6 +22,6 @@ buildGoModule rec {
     homepage = "https://github.com/SRI-CSL/gllvm";
     description = "Whole Program LLVM: wllvm ported to go";
     license = licenses.bsd3;
-    maintainers = with maintainers; [ dtzWill ];
+    maintainers = [ ];
   };
 }

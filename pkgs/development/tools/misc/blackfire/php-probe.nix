@@ -9,45 +9,52 @@
 , common-updater-scripts
 }:
 
+assert lib.assertMsg (!php.ztsSupport) "blackfire only supports non zts versions of PHP";
+
 let
   phpMajor = lib.versions.majorMinor php.version;
 
-  version = "1.88.1";
+  version = "1.92.20";
 
   hashes = {
     "x86_64-linux" = {
       system = "amd64";
       hash = {
-        "8.1" = "sha256-8t/9+USw4cun8kIsCkcFl/672rtgEBy6SgRMEzl47VU=";
-        "8.2" = "sha256-/sVDxfhJXMQZb1CdRh+qBjCt3gdYci65BN23K9Kfcys=";
+        "8.1" = "sha256-HAr+bSv7t7jJy5S9bReVF50EWLWzWmoLe4dCNFB0IJ4=";
+        "8.2" = "sha256-6twIng5yfLp+4ronaNzXjEVBnHVsd+Sz1ydURMQaRIo=";
+        "8.3" = "sha256-X0LzUHId08T1T4RUYSPyHP6pVot53B3tuvYsB3B9X6k=";
       };
     };
     "i686-linux" = {
       system = "i386";
       hash = {
-        "8.1" = "sha256-ASZKa40D6dpNyzQhqci0+fEUoduyuyoJbWvY2UjVmxA=";
-        "8.2" = "sha256-CWSTPXPr0ZCcGnkDNIh8HhDf53gNy663IWLqIRObv28=";
+        "8.1" = "sha256-YPVMQMuONZNFIGj3A0sSajXFaUj/NsDrH5+DVrOA1Uc=";
+        "8.2" = "sha256-ASStFQDrSEbaz+YE01ROBJ5NkRaGok/hYppKGFcEtQM=";
+        "8.3" = "sha256-ZOuwpGLV8Taek0XE13jkDG8sf+d+OBNIyOf9POtvpWo=";
       };
     };
     "aarch64-linux" = {
       system = "arm64";
       hash = {
-        "8.1" = "sha256-HST8U3DJ1s+ricPQ7Q4bY/eZE+mSnGaJuLKwFpLb0JI=";
-        "8.2" = "sha256-uPCIlYw9i0MFPbca+GWyzpK4oHOOmTUxR46yEBB48mg=";
+        "8.1" = "sha256-PQ+H6EqufUM3GoFUUf42Yj8mLxuDqvz4ml3/khuriag=";
+        "8.2" = "sha256-3JeZAst2jwyA7ZzaEl/7WN1D0VqkGCg8UtJTmcwVBEg=";
+        "8.3" = "sha256-wQOg1TUG0+Ld3xJ1OvpiKAaFuPe7Vbr+D/G70FSGo4c=";
       };
     };
     "aarch64-darwin" = {
       system = "arm64";
       hash = {
-        "8.1" = "sha256-4JJ7m4/ybVzu/yBtfpSwuSIKor7s80Xlt7FH3K8PwTU=";
-        "8.2" = "sha256-BW6c/qKWeOkJUBYf8TFGz7aYKPUb9kKzyfNGSv1XOhE=";
+        "8.1" = "sha256-o9YXtRuEYyp6a03z9v1F0C3KlaQx3Y4q7JIw6vvkPVo=";
+        "8.2" = "sha256-7PWqR83ir2h89wuovLOoCup+dkqz+ggXN5HzF0KYGMY=";
+        "8.3" = "sha256-SFG/lqD4iR8iDZTFGcu3t6BeFm3ZDtUiPP52trWrEEw=";
       };
     };
     "x86_64-darwin" = {
       system = "amd64";
       hash = {
-        "8.1" = "sha256-O6gZwHNIFCXuC2r4yPMuk/wg1LbsMu6aRJmwbRR3B8s=";
-        "8.2" = "sha256-l4wTdt5fGIbGPqCT3/EiRTNovyGQOV1ZRzPjYvlHQIg=";
+        "8.1" = "sha256-n4RIoBpOCfp5lugG6gzkCGRjycbs/JHUqzQAA2D3OU8=";
+        "8.2" = "sha256-jNzjOIUZfiXuYIpk4Wtx4C1P05rPgl+8rKqSMj8iD1I=";
+        "8.3" = "sha256-rMd/KOwuPRoHZC97OJppiFgUZ2xyBDPzire7y5D+q/Q=";
       };
     };
   };
@@ -76,7 +83,7 @@ stdenv.mkDerivation (finalAttrs: {
     autoPatchelfHook
   ];
 
-  setSourceRoot = "sourceRoot=`pwd`";
+  sourceRoot = ".";
 
   dontUnpack = true;
 
@@ -100,8 +107,7 @@ stdenv.mkDerivation (finalAttrs: {
       fi
 
       for source in ${lib.concatStringsSep " " (builtins.attrNames finalAttrs.passthru.updateables)}; do
-        update-source-version "$UPDATE_NIX_ATTR_PATH.updateables.$source" "0" "sha256-${lib.fakeSha256}"
-        update-source-version "$UPDATE_NIX_ATTR_PATH.updateables.$source" "$NEW_VERSION"
+        update-source-version "$UPDATE_NIX_ATTR_PATH.updateables.$source" "$NEW_VERSION" --ignore-same-version
       done
     '';
 

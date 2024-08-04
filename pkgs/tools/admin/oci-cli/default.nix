@@ -1,20 +1,24 @@
 { lib
 , fetchFromGitHub
+, fetchPypi
 , python3
+, installShellFiles
 }:
 
 let
   py = python3.override {
+    self = py;
     packageOverrides = self: super: {
 
       click = super.click.overridePythonAttrs (oldAttrs: rec {
         version = "7.1.2";
 
-        src = oldAttrs.src.override {
+        src = fetchPypi {
+          pname = "click";
           inherit version;
           hash = "sha256-0rUlXHxjSbwb0eWeCM0SrLvWPOZJ8liHVXg6qU37axo=";
-          sha256 = "";
         };
+        disabledTests = [ "test_bytes_args" ]; # https://github.com/pallets/click/commit/6e05e1fa1c2804
       });
 
       jmespath = super.jmespath.overridePythonAttrs (oldAttrs: rec {
@@ -44,6 +48,8 @@ buildPythonApplication rec {
     hash = "sha256-yooEZuSIw2EMJVyT/Z/x4hJi8a1F674CtsMMGkMAYLg=";
   };
 
+  nativeBuildInputs = [ installShellFiles ];
+
   propagatedBuildInputs = [
     arrow
     certifi
@@ -69,6 +75,24 @@ buildPythonApplication rec {
       --replace "prompt-toolkit==3.0.29" "prompt-toolkit" \
       --replace "terminaltables==3.1.0" "terminaltables" \
       --replace "oci==2.78.0" "oci"
+  '';
+
+  postInstall = ''
+    cat >oci.zsh <<EOF
+    #compdef oci
+    zmodload -i zsh/parameter
+    autoload -U +X bashcompinit && bashcompinit
+    if ! (( $+functions[compdef] )) ; then
+        autoload -U +X compinit && compinit
+    fi
+
+    EOF
+    cat src/oci_cli/bin/oci_autocomplete.sh >>oci.zsh
+
+    installShellCompletion \
+      --cmd oci \
+      --bash src/oci_cli/bin/oci_autocomplete.sh \
+      --zsh oci.zsh
   '';
 
   # https://github.com/oracle/oci-cli/issues/187

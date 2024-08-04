@@ -1,21 +1,21 @@
 { stdenv
 , lib
 , fetchFromGitHub
-, gfortran
-, blas
 , cmake
 , lapack
 , which
+, gfortran
+, blas
 }:
 
-stdenv.mkDerivation rec {
+stdenv.mkDerivation (finalAttrs: {
   pname = "qrupdate";
   version = "1.1.5";
 
   src = fetchFromGitHub {
     owner = "mpimd-csc";
     repo = "qrupdate-ng";
-    rev = "v${version}";
+    rev = "v${finalAttrs.version}";
     hash = "sha256-dHxLPrN00wwozagY2JyfZkD3sKUD2+BcnbjNgZepzFg=";
   };
 
@@ -28,6 +28,11 @@ stdenv.mkDerivation rec {
       # https://savannah.gnu.org/bugs/?50339
       "-fdefault-integer-8"
     ])}"
+  ];
+
+  # https://github.com/mpimd-csc/qrupdate-ng/issues/4
+  patches = lib.optionals (stdenv.isDarwin && stdenv.isx86_64) [
+    ./disable-zch1dn-test.patch
   ];
 
   doCheck = true;
@@ -49,4 +54,4 @@ stdenv.mkDerivation rec {
     maintainers = with maintainers; [ doronbehar ];
     platforms = platforms.unix;
   };
-}
+})

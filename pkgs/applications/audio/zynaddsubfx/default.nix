@@ -2,6 +2,7 @@
 , stdenv
 , fetchFromGitHub
 , callPackage
+, fetchpatch
 
   # Required build tools
 , cmake
@@ -64,14 +65,21 @@ in stdenv.mkDerivation rec {
     repo = pname;
     rev = "refs/tags/${version}";
     fetchSubmodules = true;
-    sha256 = "sha256-0siAx141DZx39facXWmKbsi0rHBNpobApTdey07EcXg=";
+    hash = "sha256-0siAx141DZx39facXWmKbsi0rHBNpobApTdey07EcXg=";
   };
 
   outputs = [ "out" "doc" ];
 
+  patches = [
+    # Hardcode system installed banks & presets
+    (fetchpatch {
+      url = "https://patch-diff.githubusercontent.com/raw/zynaddsubfx/zynaddsubfx/pull/295.patch";
+      hash = "sha256-UN62i9/JBs7uWTmHDKk3lkAxUXsVmIs6+6avOcL1NBg=";
+    })
+  ];
+
   postPatch = ''
     patchShebangs rtosc/test/test-port-checker.rb src/Tests/check-ports.rb
-    substituteInPlace src/Misc/Config.cpp --replace /usr $out
   '';
 
   nativeBuildInputs = [ cmake makeWrapper pkg-config ];
@@ -87,12 +95,21 @@ in stdenv.mkDerivation rec {
     ++ lib.optionals (guiModule == "ntk") [ ntk cairo libXpm ]
     ++ lib.optionals (guiModule == "zest") [ libGL libX11 ];
 
-  cmakeFlags = [ "-DGuiModule=${guiModule}" ]
+  cmakeFlags =
+    [
+      "-DGuiModule=${guiModule}"
+      "-DZYN_DATADIR=${placeholder "out"}/share/zynaddsubfx"
+    ]
     # OSS library is included in glibc.
     # Must explicitly disable if support is not wanted.
     ++ lib.optional (!ossSupport) "-DOssEnable=OFF"
     # Find FLTK without requiring an OpenGL library in buildInputs
     ++ lib.optional (guiModule == "fltk") "-DFLTK_SKIP_OPENGL=ON";
+
+  CXXFLAGS = [
+    # GCC 13: error: 'uint8_t' does not name a type
+    "-include cstdint"
+  ];
 
   doCheck = true;
   nativeCheckInputs = [ cxxtest ruby ];
@@ -136,13 +153,14 @@ in stdenv.mkDerivation rec {
 
   meta = with lib; {
     description = "High quality software synthesizer (${guiName} GUI)";
+    mainProgram = "zynaddsubfx";
     homepage =
       if guiModule == "zest"
       then "https://zynaddsubfx.sourceforge.io/zyn-fusion.html"
       else "https://zynaddsubfx.sourceforge.io";
 
     license = licenses.gpl2Plus;
-    maintainers = with maintainers; [ goibhniu kira-bruneau ];
+    maintainers = with maintainers; [ kira-bruneau ];
     platforms = platforms.all;
 
     # On macOS:

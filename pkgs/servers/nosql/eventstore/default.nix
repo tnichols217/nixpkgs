@@ -14,13 +14,13 @@ in
 
 buildDotnetModule rec {
   pname = "EventStore";
-  version = "22.10.2";
+  version = "23.6.0";
 
   src = fetchFromGitHub {
     owner = "EventStore";
     repo = "EventStore";
     rev = "oss-v${version}";
-    sha256 = "sha256-CYI1VE+6bR3UFx98IquS8rgucKmQqcHh74Jf/9CGE0k=";
+    hash = "sha256-+Wxm6yusaCoqXIbsi0ZoALAviKUyNMQwbzsQtBK/PCo=";
     leaveDotGit = true;
   };
 
@@ -41,13 +41,6 @@ buildDotnetModule rec {
     "EventStore.Projections.Core.Tests.Services.grpc_service.ServerFeaturesTests<LogFormat+V2,String>.should_receive_expected_endpoints"
     "EventStore.Projections.Core.Tests.Services.grpc_service.ServerFeaturesTests<LogFormat+V3,UInt32>.should_receive_expected_endpoints"
   ];
-
-  postConfigure = ''
-    # Fixes git execution by GitInfo on mac os
-    substituteInPlace "$HOME/.nuget/packages/gitinfo/2.0.26/build/GitInfo.targets" \
-      --replace "<GitExe Condition=\"Exists('/usr/bin/git')\">/usr/bin/git</GitExe>" " " \
-      --replace "<GitExe Condition=\"Exists('/usr/local/bin/git')\">/usr/local/bin/git</GitExe>" ""
-  '';
 
   nugetDeps = ./deps.nix;
 

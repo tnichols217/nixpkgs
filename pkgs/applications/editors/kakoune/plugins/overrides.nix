@@ -1,11 +1,11 @@
 { lib, stdenv, fetchFromGitHub, fetchFromGitLab, fetchgit
 , buildKakounePluginFrom2Nix
-, kak-lsp, parinfer-rust, rep
+, kakoune-lsp, parinfer-rust, rep
 , fzf, git, guile, kakoune-unwrapped, lua5_3, plan9port
 }:
 
 self: super: {
-  inherit kak-lsp parinfer-rust rep;
+  inherit kakoune-lsp parinfer-rust rep;
 
   case-kak = buildKakounePluginFrom2Nix {
     pname = "case-kak";
@@ -58,7 +58,7 @@ declare-option -hidden str ansi_filter %{'"$out"'/bin/kak-ansi-filter}
       description = "Kakoune support for rendering ANSI code";
       homepage = "https://github.com/eraserhd/kak-ansi";
       license = licenses.unlicense;
-      maintainers = with maintainers; [ eraserhd ];
+      maintainers = with maintainers; [ eraserhd philiptaron ];
       platforms = platforms.all;
     };
   };
@@ -88,7 +88,7 @@ declare-option -hidden str ansi_filter %{'"$out"'/bin/kak-ansi-filter}
       description = "Kakoune integration with the Plan 9 plumber";
       homepage = "https://github.com/eraserhd/kak-plumb";
       license = licenses.unlicense;
-      maintainers = with maintainers; [ eraserhd ];
+      maintainers = with maintainers; [ eraserhd philiptaron ];
       platforms = platforms.all;
     };
   };
@@ -119,7 +119,7 @@ declare-option -hidden str ansi_filter %{'"$out"'/bin/kak-ansi-filter}
       description = "Help Kakoune save and restore state between sessions";
       homepage = "https://gitlab.com/Screwtapello/kakoune-state-save";
       license = licenses.mit;
-      maintainers = with maintainers; [ Flakebi ];
+      maintainers = with maintainers; [ Flakebi philiptaron ];
       platforms = platforms.all;
     };
   };

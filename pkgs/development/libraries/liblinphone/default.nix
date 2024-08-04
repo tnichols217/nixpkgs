@@ -1,7 +1,7 @@
-{ bctoolbox
+{ lib
+, bc-soci
 , belcard
 , belle-sip
-, belr
 , cmake
 , doxygen
 , fetchFromGitLab
@@ -10,9 +10,7 @@
 , lime
 , mediastreamer
 , python3
-, bc-soci
 , sqlite
-, lib
 , stdenv
 , xercesc
 , zxing-cpp
@@ -20,7 +18,7 @@
 
 stdenv.mkDerivation rec {
   pname = "liblinphone";
-  version = "5.2.17";
+  version = "5.2.98";
 
   src = fetchFromGitLab {
     domain = "gitlab.linphone.org";
@@ -28,8 +26,14 @@ stdenv.mkDerivation rec {
     group = "BC";
     repo = pname;
     rev = version;
-    hash = "sha256-zxp+jcClfKm+VsylRtydF2rlDCkO+sa9vw8GpwAfKHM=";
+    hash = "sha256-kQZePMa7MTaSJLEObM8khfSFYLqhlgTcVyKfTPLwKYU=";
   };
+
+  patches = [
+    # zxing-cpp 2.0+ requires C++ 17
+    # Manual backport as upstream ran formatters in the meantime
+    ./backport-cpp17.patch
+  ];
 
   postPatch = ''
     substituteInPlace src/CMakeLists.txt \
@@ -55,7 +59,6 @@ stdenv.mkDerivation rec {
 
     jsoncpp
     libxml2
-    (python3.withPackages (ps: [ ps.pystache ps.six ]))
     sqlite
     xercesc
     zxing-cpp
@@ -64,6 +67,7 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [
     cmake
     doxygen
+    (python3.withPackages (ps: [ ps.pystache ps.six ]))
   ];
 
   strictDeps = true;

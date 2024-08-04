@@ -1,10 +1,9 @@
 { stdenv
 , lib
 , fetchurl
-, zlib
+, fetchpatch
 , pkg-config
 , autoreconfHook
-, xz
 , libintl
 , python
 , gettext
@@ -17,34 +16,45 @@
     (stdenv.hostPlatform == stdenv.buildPlatform || stdenv.hostPlatform.isCygwin || stdenv.hostPlatform.isLinux || stdenv.hostPlatform.isWasi)
 , icuSupport ? false
 , icu
-, enableShared ? stdenv.hostPlatform.libc != "msvcrt" && !stdenv.hostPlatform.isStatic
+, enableShared ? !stdenv.hostPlatform.isMinGW && !stdenv.hostPlatform.isStatic
 , enableStatic ? !enableShared
 , gnome
+, testers
+, enableHttp ? false
 }:
 
-let
-  # Newer versions fail with minimal python, probably because
-  # https://gitlab.gnome.org/GNOME/libxml2/-/commit/b706824b612adb2c8255819c9a55e78b52774a3c
-  # This case is encountered "temporarily" during stdenv bootstrapping on darwin.
-  # Beware that the old version has known security issues, so the final set shouldn't use it.
-  oldVer = python.pname == "python3-minimal";
-in
-  assert oldVer -> stdenv.isDarwin; # reduce likelihood of using old libxml2 unintentionally
-
-let
-libxml = stdenv.mkDerivation rec {
+stdenv.mkDerivation (finalAttrs: {
   pname = "libxml2";
-  version = "2.11.4";
+  version = "2.13.2";
 
-  outputs = [ "bin" "dev" "out" "doc" ]
+  outputs = [ "bin" "dev" "out" "devdoc" ]
     ++ lib.optional pythonSupport "py"
     ++ lib.optional (enableStatic && enableShared) "static";
   outputMan = "bin";
 
   src = fetchurl {
-    url = "mirror://gnome/sources/libxml2/${lib.versions.majorMinor version}/libxml2-${version}.tar.xz";
-    sha256 = "c34df4qz8TlynKE6JJT9F78w3bS3pCfPM2JSyrV/V/c=";
+    url = "mirror://gnome/sources/libxml2/${lib.versions.majorMinor finalAttrs.version}/libxml2-${finalAttrs.version}.tar.xz";
+    hash = "sha256-58j14LVUIVng3cQJwiyRZDBLWB6qmTBlOnb7hFsWkmM=";
   };
+
+  patches = [
+    # Fix XInclude failing too aggresively.
+    # https://gitlab.gnome.org/GNOME/libxml2/-/issues/772
+    (fetchpatch {
+      url = "https://gitlab.gnome.org/GNOME/libxml2/-/commit/a0330b53c8034bb79220e403e8d4ad8c23ef088f.patch";
+      hash = "sha256-iVAgX8qNF0fw8GYUKsWduudjEuRMEOTAENAIFTjyRjU=";
+    })
+    # Fix error handling
+    (fetchpatch {
+      url = "https://gitlab.gnome.org/GNOME/libxml2/-/commit/ed8b4264f65b1ced1e3b13967dd1cf90102cfa40.patch";
+      hash = "sha256-EvxoUcr+VXBbYvK1PBV+KWcWTDk9rMWf+GXCYvXWDMI=";
+    })
+    # Fix more error handling
+    (fetchpatch {
+      url = "https://gitlab.gnome.org/GNOME/libxml2/-/commit/e30cb632e734394ddbd7bd62b57cee3586424352.patch";
+      hash = "sha256-C0ef17wTRC9rH0dKua/LJwwqTRI5W8sKWmvL7JxzT4o=";
+    })
+  ];
 
   strictDeps = true;
 
@@ -61,15 +71,9 @@ libxml = stdenv.mkDerivation rec {
     ncurses
   ] ++ lib.optionals (stdenv.isDarwin && pythonSupport && python?isPy2 && python.isPy2) [
     libintl
-  ] ++ lib.optionals stdenv.isFreeBSD [
-    # Libxml2 has an optional dependency on liblzma.  However, on impure
-    # platforms, it may end up using that from /usr/lib, and thus lack a
-    # RUNPATH for that, leading to undefined references for its users.
-    xz
   ];
 
   propagatedBuildInputs = [
-    zlib
     findXMLCatalogs
   ] ++ lib.optionals stdenv.isDarwin [
     libiconv
@@ -83,8 +87,8 @@ libxml = stdenv.mkDerivation rec {
     (lib.enableFeature enableShared "shared")
     (lib.withFeature icuSupport "icu")
     (lib.withFeature pythonSupport "python")
-    (lib.optionalString pythonSupport "PYTHON=${python.pythonForBuild.interpreter}")
-  ];
+    (lib.optionalString pythonSupport "PYTHON=${python.pythonOnBuildForHost.interpreter}")
+  ] ++ lib.optional enableHttp "--with-http";
 
   installFlags = lib.optionals pythonSupport [
     "pythondir=\"${placeholder "py"}/${python.sitePackages}\""
@@ -105,7 +109,7 @@ libxml = stdenv.mkDerivation rec {
   '';
 
   preInstall = lib.optionalString pythonSupport ''
-    substituteInPlace python/libxml2mod.la --replace "$dev/${python.sitePackages}" "$py/${python.sitePackages}"
+    substituteInPlace python/libxml2mod.la --replace-fail "$dev/${python.sitePackages}" "$py/${python.sitePackages}"
   '';
 
   postFixup = ''
@@ -116,12 +120,16 @@ libxml = stdenv.mkDerivation rec {
   '';
 
   passthru = {
-    inherit version;
-    pythonSupport = pythonSupport;
+    inherit pythonSupport;
 
     updateScript = gnome.updateScript {
-      packageName = pname;
+      packageName = "libxml2";
       versionPolicy = "none";
+    };
+    tests = {
+      pkg-config = testers.hasPkgConfigModules {
+        package = finalAttrs.finalPackage;
+      };
     };
   };
 
@@ -131,16 +139,6 @@ libxml = stdenv.mkDerivation rec {
     license = licenses.mit;
     platforms = platforms.all;
     maintainers = with maintainers; [ eelco jtojnar ];
+    pkgConfigModules = [ "libxml-2.0" ];
   };
-};
-in
-if oldVer then
-  libxml.overrideAttrs (attrs: rec {
-    version = "2.10.1";
-    src = fetchurl {
-      url = "mirror://gnome/sources/libxml2/${lib.versions.majorMinor version}/libxml2-${version}.tar.xz";
-      sha256 = "21a9e13cc7c4717a6c36268d0924f92c3f67a1ece6b7ff9d588958a6db9fb9d8";
-    };
-  })
-else
-  libxml
+})

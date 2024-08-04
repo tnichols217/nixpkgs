@@ -4,16 +4,16 @@
 }:
 buildGoModule rec {
   pname = "juicity";
-  version = "0.1.1";
+  version = "0.4.3";
 
   src = fetchFromGitHub {
     owner = "juicity";
     repo = pname;
     rev = "v${version}";
-    hash = "sha256-wTMWmHQPJ65FRJUNt7liLF+nM/tXdq067KT0fMWlDfM=";
+    hash = "sha256-4sej/nb7d58+hSCaD6KIfDsqiGmgECPIbRKR65TbMBM=";
   };
 
-  vendorHash = "sha256-RTf0+rf6DPJf9DKRNstZzJbQ3+pU/8siLSRgUo9Bcu8=";
+  vendorHash = "sha256-SM5ZrTtuqenPsGjphkCM9JHzucw0/qBmevD+3/kyF6k=";
 
   proxyVendor = true;
 
@@ -39,7 +39,7 @@ buildGoModule rec {
 
   meta = with lib; {
     homepage = "https://github.com/juicity/juicity";
-    description = "A quic-based proxy protocol";
+    description = "Quic-based proxy protocol";
     license = licenses.agpl3Only;
     maintainers = with maintainers; [ oluceps ];
   };

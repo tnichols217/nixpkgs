@@ -9,14 +9,14 @@
 
 python3.pkgs.buildPythonApplication rec {
   pname = "autorandr";
-  version = "1.14";
+  version = "1.15";
   format = "other";
 
   src = fetchFromGitHub {
     owner = "phillipberndt";
     repo = "autorandr";
     rev = "refs/tags/${version}";
-    hash = "sha256-Ru3nQF0DB98rKSew6QtxAZQEB/9nVlIelNX3M7bNYHk=";
+    hash = "sha256-8FMfy3GCN4z/TnfefU2DbKqV3W35I29/SuGGqeOrjNg";
   };
 
   nativeBuildInputs = [ installShellFiles desktop-file-utils ];
@@ -41,7 +41,8 @@ python3.pkgs.buildPythonApplication rec {
     # see https://github.com/phillipberndt/autorandr/issues/197
     installShellCompletion --cmd autorandr \
         --bash contrib/bash_completion/autorandr \
-        --zsh contrib/zsh_completion/_autorandr
+        --zsh contrib/zsh_completion/_autorandr \
+        --fish contrib/fish_completion/autorandr.fish
 
     make install TARGETS='autostart_config' PREFIX=$out DESTDIR=$out
 
@@ -67,7 +68,8 @@ python3.pkgs.buildPythonApplication rec {
     homepage = "https://github.com/phillipberndt/autorandr/";
     description = "Automatically select a display configuration based on connected devices";
     license = licenses.gpl3Plus;
-    maintainers = with maintainers; [ coroa globin ];
+    maintainers = with maintainers; [ coroa ];
     platforms = platforms.unix;
+    mainProgram = "autorandr";
   };
 }

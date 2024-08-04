@@ -1,45 +1,37 @@
-{ lib
-, rustPlatform
-, fetchFromGitHub
-, fetchpatch
+{
+  lib,
+  rustPlatform,
+  fetchFromGitHub,
 }:
 
 rustPlatform.buildRustPackage rec {
   pname = "lurk";
-  version = "0.3.3";
+  version = "0.3.6";
 
   src = fetchFromGitHub {
     owner = "jakwai01";
     repo = pname;
     rev = "v${version}";
-    hash = "sha256-D/wJAmlc6OUuD8kSfGevG+UoPKy58X0lObL7mjiBG+c=";
+    hash = "sha256-u37q5AJe6zsPNe5L+k3uVP7r92X4v3qhApPKYndZif4=";
   };
 
-  cargoHash = "sha256-PFR6jMAvEybT/XOfLrv21F8ZxSX0BZDiEFtgQL5fL18=";
+  cargoHash = "sha256-1hKyrlCDsOe+F88lg4+I5JMxG44CN2MOLi4GlaDBctk=";
 
-  cargoPatches = [
-    # update the version to 0.3.3
-    (fetchpatch {
-      name = "chore-prepare-release.patch";
-      url = "https://github.com/JakWai01/lurk/commit/cb4355674159255ac4186283a93de294de057d1b.patch";
-      hash = "sha256-N+/8AGEToEqhkQ6BYGQP279foZbt6DzUBmAUaHm9hW4=";
-    })
-  ];
-
-  patches = [
-    (fetchpatch {
-      name = "fix-tests.patch";
-      url = "https://github.com/JakWai01/lurk/commit/87eb4aa8bf9a551b24cec2146699cb2c22d62019.patch";
-      hash = "sha256-m44m1338VODX+HGEVMLozKfVvXsQxvLIpo28VBK//vM=";
-    })
-  ];
+  postPatch = ''
+    substituteInPlace src/lib.rs \
+      --replace-fail '/usr/bin/ls' 'ls'
+  '';
 
   meta = with lib; {
-    description = "A simple and pretty alternative to strace";
+    description = "Simple and pretty alternative to strace";
+    mainProgram = "lurk";
     homepage = "https://github.com/jakwai01/lurk";
     changelog = "https://github.com/jakwai01/lurk/releases/tag/${src.rev}";
     license = licenses.agpl3Only;
     maintainers = with maintainers; [ figsoda ];
-    platforms = [ "i686-linux" "x86_64-linux" ];
+    platforms = [
+      "i686-linux"
+      "x86_64-linux"
+    ];
   };
 }

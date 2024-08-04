@@ -4,6 +4,7 @@
 }:
 let
   py = python3.override {
+    self = py;
     packageOverrides = self: super: {
 
       cmd2 = super.cmd2.overridePythonAttrs (oldAttrs: rec {
@@ -40,7 +41,6 @@ buildPythonApplication rec {
   ];
 
   nativeBuildInputs = [
-    pythonRelaxDepsHook
   ];
 
   propagatedBuildInputs = [
@@ -71,6 +71,7 @@ buildPythonApplication rec {
 
   meta = with lib; {
     description = "IoT security testing and exploitation framework";
+    mainProgram = "expliot";
     longDescription = ''
       EXPLIoT is a Framework for security testing and exploiting IoT
       products and IoT infrastructure. It provides a set of plugins

@@ -11,17 +11,18 @@
 , proj
 , sqlite
 , libiconv
+, zlib
 }:
 
 stdenv.mkDerivation rec {
   pname = "libspatialite";
-  version = "5.0.1";
+  version = "5.1.0";
 
   outputs = [ "out" "dev" ];
 
   src = fetchurl {
-    url = "https://www.gaia-gis.it/gaia-sins/libspatialite-${version}.tar.gz";
-    hash = "sha256-7svJQxHHgBLQWevA+uhupe9u7LEzA+boKzdTwbNAnpg=";
+    url = "https://www.gaia-gis.it/gaia-sins/libspatialite-sources/libspatialite-${version}.tar.gz";
+    hash = "sha256-Q74t00na/+AW3RQAxdEShYKMIv6jXKUQnyHz7VBgUIA=";
   };
 
   nativeBuildInputs = [
@@ -34,10 +35,11 @@ stdenv.mkDerivation rec {
     freexl
     geos
     librttopo
-    libxml2
+    (libxml2.override { enableHttp = true; })
     minizip
     proj
     sqlite
+    zlib
   ] ++ lib.optionals stdenv.isDarwin [
     libiconv
   ];
@@ -64,6 +66,6 @@ stdenv.mkDerivation rec {
     # They allow any of these
     license = with licenses; [ gpl2Plus lgpl21Plus mpl11 ];
     platforms = platforms.unix;
-    maintainers = with maintainers; [ dotlambda ];
+    maintainers = with maintainers; teams.geospatial.members ++ [ dotlambda ];
   };
 }

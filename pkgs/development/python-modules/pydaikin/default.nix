@@ -1,33 +1,39 @@
-{ lib
-, aiohttp
-, buildPythonPackage
-, fetchFromBitbucket
-, freezegun
-, netifaces
-, pytest-aiohttp
-, pytestCheckHook
-, pythonOlder
-, urllib3
+{
+  lib,
+  aiohttp,
+  buildPythonPackage,
+  fetchFromGitHub,
+  freezegun,
+  netifaces,
+  pytest-aiohttp,
+  pytestCheckHook,
+  pythonOlder,
+  urllib3,
+  setuptools,
+  tenacity,
 }:
 
 buildPythonPackage rec {
   pname = "pydaikin";
-  version = "2.10.5";
-  format = "setuptools";
+  version = "2.13.0";
+  pyproject = true;
 
-  disabled = pythonOlder "3.6";
+  disabled = pythonOlder "3.11";
 
-  src = fetchFromBitbucket {
-    owner = "mustang51";
-    repo = pname;
-    rev = "v${version}";
-    hash = "sha256-G4mNBHk8xskQyt1gbMqz5XhoTfWWxp+qTruOSqmTvOc=";
+  src = fetchFromGitHub {
+    owner = "fredrike";
+    repo = "pydaikin";
+    rev = "refs/tags/v${version}";
+    hash = "sha256-t4SyFAgrLpXlDx464OHBWT8b+vGfIGZH6lKjX0k6tNw=";
   };
 
-  propagatedBuildInputs = [
+  build-system = [ setuptools ];
+
+  dependencies = [
     aiohttp
     netifaces
     urllib3
+    tenacity
   ];
 
   doCheck = false; # tests fail and upstream does not seem to run them either
@@ -38,14 +44,14 @@ buildPythonPackage rec {
     pytestCheckHook
   ];
 
-  pythonImportsCheck = [
-    "pydaikin"
-  ];
+  pythonImportsCheck = [ "pydaikin" ];
 
   meta = with lib; {
     description = "Python Daikin HVAC appliances interface";
-    homepage = "https://bitbucket.org/mustang51/pydaikin";
+    homepage = "https://github.com/fredrike/pydaikin";
+    changelog = "https://github.com/fredrike/pydaikin/releases/tag/v${version}";
     license = with licenses; [ gpl3Only ];
     maintainers = with maintainers; [ fab ];
+    mainProgram = "pydaikin";
   };
 }

@@ -2,19 +2,19 @@
 , glibc, python3
 }:
 
-stdenv.mkDerivation rec {
+stdenv.mkDerivation (finalAttrs: {
   pname = "0xtools";
-  version = "1.1.3";
+  version = "2.0.3";
 
   src = fetchFromGitHub {
     owner = "tanelpoder";
-    repo = pname;
-    rev = "v${version}";
-    sha256 = "sha256-pe64st3yhVfZi8/sTEfH1cNjx7JpqxDmxMmodpXnqaU=";
+    repo = "0xtools";
+    rev = "v${finalAttrs.version}";
+    hash = "sha256-QWH3sKYFiEWuexZkMlyWQPHmKJpcaiWI5szhdx5yKtM=";
   };
 
   postPatch = ''
-    substituteInPlace lib/0xtools/proc.py \
+    substituteInPlace lib/0xtools/psnproc.py \
       --replace /usr/include/asm/unistd_64.h ${glibc.dev}/include/asm/unistd_64.h
   '';
 
@@ -33,4 +33,4 @@ stdenv.mkDerivation rec {
     maintainers = with maintainers; [ astro ];
     platforms = [ "x86_64-linux" ];
   };
-}
+})

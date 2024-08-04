@@ -11,7 +11,7 @@ rustPlatform.buildRustPackage rec {
     sha256 = "1qq4fbsd2mvxblsggwbnh88mj18f3vrfzv1kgc7a92pfiwxznq8r";
   };
 
-  cargoSha256 = "1r6dl7qipbyyvjcd3l9ynawjln1g1qzvw5za6nyjcf41dzv48m8x";
+  cargoHash = "sha256-HVVE9m+BOCa9NeoXvj8OL1gqubI+0dGY3N6vG/GhzeQ=";
 
   nativeBuildInputs = [ makeWrapper ];
 
@@ -26,5 +26,6 @@ rustPlatform.buildRustPackage rec {
     platforms = platforms.unix;
     license = with licenses; [ asl20 /* OR */ mit ];
     maintainers = with maintainers; [ misuzu ];
+    mainProgram = "nix-simple-deploy";
   };
 }
